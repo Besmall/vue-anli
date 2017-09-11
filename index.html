@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>效果案例</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+    <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript" src="js/vue-router.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <style>
+      .banner{margin-top: 80px;}
+      .tc{
+          margin-top: 10px;
+      }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="container">
+           
+        <nav class="navbar navbar-default">
+        <!-- We use the fluid option here to avoid overriding the fixed width of a normal container within the narrow content columns. -->
+            <div class="container-fluid">
+                <div class="navbar-header" >
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    <a class="navbar-brand" href="javascript:;">Vue</a>
+                </div>
+        
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li><router-link to="/foo">首页</router-link></li>
+                        <li><router-link to="/bar">关于我们</router-link></li>
+                        <li><router-link to="/user">账户中心</router-link></li>
+                        <li><router-link to="/user/pwd">密码管理</router-link></li>
+                        <li><router-link to="/login">登录</router-link></li>
+                        <li>
+                            <button type='button' class='btn btn-success tc' @click="logout">退出</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+        </nav>
+        <router-view></router-view>
+    </div>
+
+    <template id="logintpl">
+        <div class="jumbotron banner">
+            <button type='button' class='btn btn-info ' @click="login">登录</button>
+        </div> 
+    </template>
+    
+    <script>
+
+
+        var Foo = {
+            template:"<div class='jumbotron banner'><h3>首页</h3></div>"
+        }
+        var Bar = {
+            template:"<div class='jumbotron banner'><h3>关于我们</h3></div>"
+        }
+        var User = {
+            template:"<div class='jumbotron banner'><h3>账户中心</h3><router-view></router-view></div>"
+        }
+        var Pwd = {
+            template:"<div class='jumbotron banner'><h3>密码管理</h3></div>"
+        }
+       
+
+        var routes = [
+            //我是首页
+            {path:"/foo" , component:Foo},
+            //我是关于我们
+            {path:"/bar" , component:Bar},
+            //我是账户中心
+            {
+                path:"/user" , 
+                meta:{requireLogin:true},
+                component:User,
+                children:[
+                    {
+                        //我是密码
+                        path:"pwd" , 
+                        meta:{requireLogin:true},
+                        component:Pwd
+                    }
+                ]
+            },    
+            //我是登录
+            {
+                path:"/login" , 
+                component:{
+                    template:"#logintpl",
+                    methods:{
+                        login:function(){
+                            isLogin = true
+                        }
+                    }
+                }
+                
+            },
+        ]
+        var router = new VueRouter({
+            routes
+        })
+        
+        var isLogin = true ;
+        router.beforeEach((to, from, next) => {
+            if(to.meta.requireLogin && !isLogin){
+                next("/login")
+            }else{
+                next();
+            }
+        })
+
+        var app = new Vue({
+            el:"#app",
+            router,
+            methods:{
+                logout:function(){
+                    isLogin = false,
+                    router.push("/login");
+                
+                }
+            }
+        });
+    </script>
+    
+</body>
+</html>
